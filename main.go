@@ -14,6 +14,7 @@ import (
 
 func main() {
 	// Define flag for search query
+	db := flag.String("db", "", "Path to the OVN database file")
 	all := flag.Bool("all", false, "Display all output")
 	search := flag.String("search", "", "Search for a specific table")
 	uuid := flag.String("uuid", "", "UUID to search for")
@@ -34,17 +35,23 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error: At least one flag is required.\n")
 		flag.Usage()
 		os.Exit(1)
-	} else if flagCount > 1 {
-		fmt.Fprintf(os.Stderr, "Error: Only one flag can be used at a time.\n")
+	} else if flagCount > 2 {
+		fmt.Fprintf(os.Stderr, "Error: Only two flag can be used at a time.\n")
 		flag.Usage()
 		os.Exit(1)
 	}
 
 	// Find the leader_nbdb file recursively from the current directory
-	filePath, err := findFile("leader_nbdb")
-	if err != nil {
-		fmt.Println("Error finding file:", err)
-		return
+	var filePath string
+	if *db != "" {
+		filePath = *db
+	} else {
+		var err error
+		filePath, err = findFile("leader_nbdb")
+		if err != nil {
+			fmt.Println("Error finding file:", err)
+			return
+		}
 	}
 
 	// Open the file
